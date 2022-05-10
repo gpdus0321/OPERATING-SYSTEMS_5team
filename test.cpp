@@ -17,7 +17,6 @@ typedef struct
 class process{
 public:
     process(int name, int arrive, int service, int priority, int tq);
-
 };
 
 int num;
