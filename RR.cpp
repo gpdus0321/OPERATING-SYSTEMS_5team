@@ -1,175 +1,287 @@
 #include <iostream>
 #include <cstdlib>
-#include <list>
+#include <algorithm>
 #include <queue>
-#include <string.h>
-#include <vector>
-
+#include <stdlib.h>
 using namespace std;
 
-int num=0;
-int TQ=0;
+typedef struct process {
+    int name;
+    int arrive;
+    int burst;
+    int priority;
+}process;
 
-vector<processing>* processing_time;
+typedef struct processing {
+    int start;
+    int end;
+    int burst;
+}processing;
+
+int num = 0;
+int TQ = 0;
+
+vector<processing>* processing_time; // processingtime 배열
 int* burst_time; // bursttime 배열
 int* complete_time; // completetime 배열
 int* wait_time; // waiting time 배열
 int* turnaround_time; //turnaround time 배열
+int* response_time;
+
+
 //////// RR은 도착시간 순서이긴한데 TQ에 맞춰서 계속 바뀔 수 있다.
-/*typedef struct
-{
-	int name;//이름
-    int arrive;//도착시간
-    int service;//실행시간
-    int priority;//우선순위
-    int tq;//tq
-} process;*/
-class Process{
-    friend class set;
-public:
-    int name;
-    int arrive;
-    int service;
-    int priority;
-    Process(int name_=0, int arrive_ = 0, int service_ = 0, int priority_ = 0){
-        //strcpy(name, name_);//strcpy_s 사용하면 더 좋음
-        name = name_;
-        arrive = arrive_;
-        service = service_;
-        priority = priority_;
-    }
-    //void RR();
-};
-
-typedef struct processing {
-	int start;
-	int end;
-	int burst;
-}processing;
-
-class Set {
-public:
-    Process *head[10000];
-    int n=0;
-    Set(){
-        /*head[n] = new Process();
-        n++;*/
-    }
-    void insert(int name_=0, int arrive_ = 0, int service_ = 0, int priority_ = 0){
-        //Process process[num];
-        head[n] = new Process(name_, arrive_, service_, priority_);
-        n++;
-    }
-    void sort();
-    void RR();
-};
-
-
-void Set::sort(){
-    int i, j;
-    Process *temp = new Process();
-
-    for(i = 1; i<num; i++){
-        for(j=1; j<i; j++){
-            if(head[j]->arrive < head[j+1]->arrive){
-                temp = head[j];
-                head[j] = head[j+1];
-                head[j+1] = temp;
-            }
-        }
-    }
-}
 
 //queue에 넣어야지
 //도착순으로 정렬 됬으니까
 //이제 queue 넣어
 //근데 이제 TQ를 생각하면서
 //만약 TQ가 2라고 한다면
-//queue에 process[0]번째 2번 insert 해주고, service -= 2 해주고,O
-//process[1]번째 2번 insert 해주고, service -= 2 해주고, O
-//만약 service에 값이 0이라면, 거기는 이제 queue에 insert안해주고, 다음꺼를 찾는다. O
-//만약 service 값이 1 이라고 하면, queue에 한번만 insert해주어야한다. O
+//queue에 process[0]번째 2번 insert 해주고, burst -= 2 해주고,O
+//process[1]번째 2번 insert 해주고, burst -= 2 해주고, O
+//만약 burst에 값이 0이라면, 거기는 이제 queue에 insert안해주고, 다음꺼를 찾는다. O
+//만약 burst 값이 1 이라고 하면, queue에 한번만 insert해주어야한다. O
 
 //이렇게 반복인가?
 
 //RR은 서비스 타임, TQ, 도착시간만 있으면됨
 //TQ시간 만큼 빼야지,,,,,
 
-//프로세스별 대기시간 및 평균 대기시간, 평균 반환시간, 각 프로세스별 응답시간 및 평균 응답시간
+//각 프로세스별 대기시간 및 평균 대기시간, 각 프로세스별 반환시간 및 평균 반환시간, 각 프로세스별 응답시간 및 평균 응답시간
+//**********redyQ 필요함!!!!!!
+void RR(process* Process);
+void Priority(process* Process);
+void print_(double avr_wait, double avr_turnaround, double avr_response);
+void sort_arrive(process* Process);
+void sort_priority(process* Process);
 
-void Set::RR(){
-    sort();
-    int i=0;
-    int temp=0;
-    int sum=0;
-    processing pt;
-    int total = 0, complate = 0, turnaroun = 0, wait = 0;
-    pt.start= 0;
 
-    queue<int> queue;
-    for(i = 0; i<num; i++){
-        sum += head[i]->service;
+int main() {
+    int name;
+    int arrive, burst, priority;
+
+    cout << "개수를 입력하시오: ";
+    cin >> num;
+    cout << "TQ를 입력하시오: ";
+    cin >> TQ;
+
+    process* Process = new process[num];
+
+    processing_time = new vector<processing>[num]();
+    burst_time = new int[num]();
+    complete_time = new int[num]();
+    wait_time = new int[num]();
+    turnaround_time = new int[num]();
+    response_time = new int[num]();
+
+    for (int i = 0; i < num; i++) {
+        cout << "프로세스별 ariive burst priority 입력하세요: ";
+        cin >> arrive >> burst >> priority;
+        Process[i].name = i;
+        Process[i].arrive = arrive;
+        Process[i].priority = priority;
+        Process[i].burst = burst;
+        burst_time[i] = burst;
     }
+    RR(Process);
+    delete[]wait_time;
+    delete[]processing_time;
+    delete[]complete_time;
+    delete[]turnaround_time;
+    delete[]burst_time;
+    delete[]response_time;
 
-    while(1){
+    return 0;
+}
+void RR(process* Process) {
+
+    sort_arrive(Process);
+
+    int i, sum = 0, complete = 0, turnaround = 0, wait = 0;
+    process ing = {};
+    processing pt = {};
+
+    double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
+    queue<process> Plist = {};
+    queue<process> readyQ = {};
+
+    for (i = 0; i < num; i++)
+        processing_time[i].clear();
+
+
+    for (i = 0; i < num; i++) {
+        Plist.push(Process[i]);
+        sum += Process[i].burst;
+    }
+    i = 0;
+    while (i < sum) {
+
+        while (1) {
+            if (Plist.size() != 0 && Plist.front().arrive == i) {
+                readyQ.push(Plist.front());
+                Plist.pop();
+            }
+            else break;
+        }
+
+        ing = readyQ.front();
+        readyQ.pop();
+
+        int name_ = ing.name;
+        int burst_ = ing.burst;
+        int arrive_ = ing.arrive;
         pt.start = i;
-        if(head[i]->service == 0){
-            temp++;
-        }
-        else if(head[i]->service >= TQ){
-            for(i = 0;i <head[i]->name;i++)
-                queue.push(head[i]->name);
-            head[i]->service = head[i]->service - TQ;
-            temp=0;
 
-        }
-        else{
-            for(i = 0; i<head[i]->service; i++)
-                queue.push(head[i]->name);
-            head[i]->service = 0;
-            temp=0;
+        //큰경우
+        if (burst_ > TQ) {
+            while (1) {
+                if (Plist.size() != 0 && Plist.front().arrive < i + TQ) {
+                    readyQ.push(Plist.front());
+                    Plist.pop();
+                }
+                else
+                    break;
+            }
 
-            pt.end = pt.start + head[i]->service;
-            pt.burst = head[i]->service;
-            if(pt.burst != 0)
-                processing_time[i].push_back(pt);
+            pt.end = pt.start + TQ;
+            pt.burst = TQ;
+            processing_time[name_].push_back(pt);
             pt.start = pt.end;
 
+            ing.burst -= TQ;
+            readyQ.push(ing);
+            i = i + TQ;
+
         }
-        i++;
-        if(i==num){
-            i = 0;
+        //작은경우
+        else {
+            while (1) {
+                if (Plist.size() != 0 && Plist.front().arrive < i + burst_) {
+                    readyQ.push(Plist.front());
+                    Plist.pop();
+                }
+                else
+                    break;
+            }
+
+            pt.end = pt.start + burst_;
+            pt.burst = burst_;
+            if (pt.burst != 0)
+                processing_time[name_].push_back(pt);
+            pt.start = pt.end;
+
+            complete = i + burst_;
+            turnaround = complete - arrive_;
+            wait = complete - arrive_ - burst_time[name_];
+            complete_time[name_] = complete;
+            turnaround_time[name_] = turnaround;
+            wait_time[name_] = wait;
+
+            avr_wait += (double)wait;
+            avr_turnaround += (double)turnaround;
+
+            i = i + burst_;
         }
-        if(temp==num){
-            break;
-        }
+    }
+    for (i = 0; i < num; i++) {
+        response_time[i] = processing_time[i][0].start - Process[i].arrive;
+        avr_response += response_time[i];
     }
 
-    while(!queue.empty()){
-        cout<<queue.front()<<" ";
-        queue.pop();
+    avr_wait /= (double)num;
+    avr_turnaround /= (double)num;
+    avr_response /= (double)num;
+
+    print_(avr_wait, avr_turnaround, avr_response);
+}
+// 비선점 Priority이면 우선순위 정렬이 필요함 => sort_priority
+// 근데 선점이랑 다르게 이거는 한번 실행하면 종료할때까지 실행한다.
+// 그렇다고 우선순위 순으로 계속 하는게 아니라, 0초에 시작하는 것 중에 우선순위 높은거 실행하고
+// 그 프로세스가 끝나고 난 시간에 우선순위 높은거 실행하고, 그런식으로 진행해야함.
+// 그럼 일단 진행 시간 확인해야지
+void Priority(process* Process) {
+    sort_priority(Process);
+
+    int i, complete = 0, turnaround = 0, wait = 0;
+    process ing = {};
+    processing pt = {};
+
+    double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
+    queue<process> Plist = {};
+
+    for (i = 0; i < num; i++)
+        processing_time[i].clear();
+
+    for (i = 0; i < num; i++)
+        Plist.push(Process[i]);
+
+    while (1) {
+
     }
+
+}
+
+void print_(double avr_wait, double avr_turnaround, double avr_response) {
+    int i, j;
+
+    cout << endl << "간트 차트" << endl;
+    //간트차트는 start 오름차순 정렬해서 죽 뽑으면 될듯.
+
+    for (int i = 0; i < num; i++) {
+        cout << "P" << i + 1 << " : ";
+        for (int j = 0; j < processing_time[i].size(); j++)
+            cout << "(" << processing_time[i][j].start << " ~ " << processing_time[i][j].end << " " << processing_time[i][j].burst << "실행) ";
+        cout << endl;
+    }
+
+    //프로세스별 대기시간
+    cout << "프로세스별 대기시간 : ";
+    for (i = 0; i < num; i++)
+        cout << "P" << i << " - " << wait_time[i] << "  ";
+    cout << endl;
+    //프로세스별 반환시간
+    cout << "프로세스별 반환시간 : ";
+    for (i = 0; i < num; i++)
+        cout << "P" << i << " - " << turnaround_time[i] << "  ";
+    cout << endl;
+    //프로세스별 응답시간
+    cout << "프로세스별 응답시간 : ";
+    for (i = 0; i < num; i++)
+        cout << "P" << i << " - " << response_time[i] << "  ";
+
+    cout << endl;
+    //평균대기시간
+    cout << "평균 대기시간 : " << avr_wait << endl;
+    //평균반환시간
+    cout << "평균 반환시간 : " << avr_turnaround << endl;
+    //평균응답시간
+    cout << "평균 응답시간 : " << avr_response << endl;
 }
 
 
+void sort_arrive(process* Process) {
+    int i, j;
 
-
-int main(){
-    int name;
-    int arrive, service, priority, tq;
-    Set *set = new Set();
-    cout << "개수를 입력하시오: ";
-    cin >> num;
-    cout << "TQ를 입력하시오";
-    cin >> TQ;
-
-    //Process *process[num];
-    for(int i = 0;i<num;i++){
-        cout << "프로세스별 이름과 도착시간 서비스시간 우선순위 TQ를 입력하세요";
-        cin>>name>>arrive>>service>>priority;
-        set->insert(name, arrive, service, priority);
+    for (i = 0; i < num - 1; i++) {
+        for (j = 0; j < num - i; j++) {
+            if (Process[j].arrive > Process[j + 1].arrive) {
+                process temp = Process[j + 1];
+                Process[j + 1] = Process[j];
+                Process[j] = temp;
+            }
+        }
     }
-    set->RR();
-    //RR(**process);
+}
 
+void sort_priority(process* Process) {
+    int i, j;
+
+    for (i = 0; i < num - 1; i++) {
+        for (j = 0; j < num - i; j++) {
+            if (Process[j].priority > Process[j + 1].priority) {
+                process temp = Process[j + 1];
+                Process[j + 1] = Process[j];
+                Process[j] = temp;
+            }
+        }
+    }
 }
