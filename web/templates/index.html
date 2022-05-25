@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
+    />
+  </head>
+  <body>
+    <div class="result">
+      <header class="header">
+        CPU 스케쥴링 시뮬레이터
+        <ul>
+          <li>김현채</li>
+          <li>박혜연</li>
+          <li>이지수</li>
+          <li>장명서</li>
+        </ul>
+      </header>
+      <section class="section">
+        <form action="" method="post" class="inputList">
+          <div class="inputContainer newInputContainer">
+            프로세스 ID
+            <input placeholder="pid" />
+            도착시간
+            <input placeholder="0" />
+            서비스시간
+            <input placeholder="10" />
+            우선순위
+            <input placeholder="1" />
+            시간할당량
+            <input placeholder="1" />
+            <button class="plusButton" onClick="new_line()">+</button>
+          </div>
+          <input class="submit" type="submit" value="계산하기" />
+        </form>
+      </section>
+      <div class="sectionList">
+        {% for s in scheduler %}
+        <div class="scheduler">
+          <section class="section">
+            <div class="schedulerName">{{s.schedulerName}}</div>
+            <div class="title">간트 차트</div>
+            <div class="ganttContainer">
+              <div class="ganttBackground">
+                {% for r in range(s.mx) %}
+                <div class="ganttBackgroundItem"></div>
+                {% endfor %}
+              </div>
+              <div class="gantt">
+                {% for p in s.processes %}
+                <div
+                  class="ganttItem"
+                  style="margin-left: {{p.startTime/scheduler[0].mx*100}}%; width: {{(p.endTime-p.startTime)/scheduler[0].mx*100}}%"
+                >
+                  <div
+                    class="ganttItemBackground"
+                    style="background: #{{p.background}}"
+                  >
+                    {{p.pid}}
+                  </div>
+                  <div class="ganttHover">
+                    <span>
+                      <strong>start:</strong>
+                      {{p.startTime}}
+                    </span>
+                    <span>
+                      <strong>end:</strong>
+                      {{p.endTime}}
+                    </span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </section>
+          <section class="section">
+            <div class="title">대기 시간</div>
+            <div class="waitingList">
+              {% for p in s.processes %}
+              <div>{{p.pid}}</div>
+              <div>{{p.waitingTime}}</div>
+              {% endfor %}
+            </div>
+            <div class="averageWaitingTime">
+              <strong>평균 대기시간: </strong>{{s.averageWaitingTime}}
+            </div>
+          </section>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <script>
+      function new_line() {
+        const inputContainer = document.createElement("div");
+        inputContainer.className = "inputContainer";
+        inputContainer.append("프로세스 ID");
+        const pidInput = document.createElement("input");
+        pidInput.placeholder = "pid";
+        inputContainer.appendChild(pidInput);
+        inputContainer.append("도착시간");
+        const arriveTimeInput = document.createElement("input");
+        arriveTimeInput.placeholder = "0";
+        inputContainer.appendChild(arriveTimeInput);
+        inputContainer.append("서비스시간");
+        const serviceTimeInput = document.createElement("input");
+        serviceTimeInput.placeholder = "10";
+        inputContainer.appendChild(serviceTimeInput);
+        inputContainer.append("우선순위");
+        const priorityInput = document.createElement("input");
+        priorityInput.placeholder = "1";
+        inputContainer.appendChild(priorityInput);
+        inputContainer.append("시간할당량");
+        const quotaInput = document.createElement("input");
+        quotaInput.placeholder = "1";
+        inputContainer.appendChild(quotaInput);
+        document
+          .querySelectorAll(".newInputContainer input")
+          .forEach((e) => (e.value = ""));
+        document
+          .querySelector(".inputList")
+          .insertBefore(
+            inputContainer,
+            document.querySelector(".inputList .newInputContainer")
+          );
+        document
+          .querySelectorAll(".newInputContainer input")
+          .forEach((e) => (e.value = ""));
+      }
+    </script>
+  </body>
+</html>
