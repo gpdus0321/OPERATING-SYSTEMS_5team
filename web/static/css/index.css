@@ -166,6 +166,10 @@ header > ul {
   gap: 0.5rem;
 }
 
+.quotaContainer {
+  place-self: center;
+}
+
 .inputContainer {
   display: flex;
   gap: 0.5rem;

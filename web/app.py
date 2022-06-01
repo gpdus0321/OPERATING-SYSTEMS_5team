@@ -6,8 +6,6 @@ import random
 
 import ctypes
 
-a = ctypes.CDLL("./code.so")
-mul = a.mul
 
 app = Flask(__name__)
 
@@ -27,7 +25,7 @@ def hello_world():
 
 @ app.route('/', methods=['post'])
 def form_submit():
-    data = request.form
+    data = request.form.getlist('pid')
     print(data)
     return ('', 204)
 
@@ -39,8 +37,6 @@ processes = [{
     "pid": "p",
     "startTime": 0,
     "endTime": 1
-
-
 }, {
     "pid": "p",
     "startTime": 1,

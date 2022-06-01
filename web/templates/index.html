@@ -25,22 +25,23 @@
           <li>김현채</li>
           <li>박혜연</li>
           <li>이지수</li>
-          <li>장명서</li>
         </ul>
       </header>
       <section class="section">
-        <form action="" method="post" class="inputList">
+        <form method="POST" class="inputList">
+          <div class="quotaContainer inputContainer">
+            시간할당량
+            <input placeholder="1" name="quota" />
+          </div>
           <div class="inputContainer newInputContainer">
             프로세스 ID
-            <input placeholder="pid" />
+            <input placeholder="pid" name="pid" />
             도착시간
-            <input placeholder="0" />
+            <input placeholder="0" name="arrive_time" />
             서비스시간
-            <input placeholder="10" />
+            <input placeholder="10" name="service_time" />
             우선순위
-            <input placeholder="1" />
-            시간할당량
-            <input placeholder="1" />
+            <input placeholder="1" name="priority" />
             <button class="plusButton" onClick="new_line()">+</button>
           </div>
           <input class="submit" type="submit" value="계산하기" />
@@ -121,10 +122,6 @@
         const priorityInput = document.createElement("input");
         priorityInput.placeholder = "1";
         inputContainer.appendChild(priorityInput);
-        inputContainer.append("시간할당량");
-        const quotaInput = document.createElement("input");
-        quotaInput.placeholder = "1";
-        inputContainer.appendChild(quotaInput);
         document
           .querySelectorAll(".newInputContainer input")
           .forEach((e) => (e.value = ""));
