@@ -52,7 +52,7 @@ void RR(process* Process);
 void Priority(process* Process);
 void print_(double avr_wait, double avr_turnaround, double avr_response);
 void sort_arrive(process* Process);
-void sort_priority(process* Process);
+void sort_priority(process* Process, int i, int temp);
 
 
 int main() {
@@ -82,7 +82,10 @@ int main() {
         Process[i].burst = burst;
         burst_time[i] = burst;
     }
+
     RR(Process);
+    //Priority(Process);
+
     delete[]wait_time;
     delete[]processing_time;
     delete[]complete_time;
@@ -93,16 +96,15 @@ int main() {
     return 0;
 }
 void RR(process* Process) {
-
     sort_arrive(Process);
 
     int i, sum = 0, complete = 0, turnaround = 0, wait = 0;
-    process ing = {};
-    processing pt = {};
+    process ing;
+    processing pt;
 
     double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
-    queue<process> Plist = {};
-    queue<process> readyQ = {};
+    queue<process> Plist;
+    queue<process> readyQ;
 
     for (i = 0; i < num; i++)
         processing_time[i].clear();
@@ -116,7 +118,7 @@ void RR(process* Process) {
     while (i < sum) {
 
         while (1) {
-            if (Plist.size() != 0 && Plist.front().arrive == i) {
+            if (Plist.size() != 0 && Plist.front().arrive <= i) {
                 readyQ.push(Plist.front());
                 Plist.pop();
             }
@@ -134,7 +136,7 @@ void RR(process* Process) {
         //큰경우
         if (burst_ > TQ) {
             while (1) {
-                if (Plist.size() != 0 && Plist.front().arrive < i + TQ) {
+                if (Plist.size() != 0 && Plist.front().arrive <= i + TQ) {
                     readyQ.push(Plist.front());
                     Plist.pop();
                 }
@@ -150,12 +152,11 @@ void RR(process* Process) {
             ing.burst -= TQ;
             readyQ.push(ing);
             i = i + TQ;
-
         }
         //작은경우
         else {
             while (1) {
-                if (Plist.size() != 0 && Plist.front().arrive < i + burst_) {
+                if (Plist.size() != 0 && Plist.front().arrive <= i + burst_) {
                     readyQ.push(Plist.front());
                     Plist.pop();
                 }
@@ -181,16 +182,13 @@ void RR(process* Process) {
 
             i = i + burst_;
         }
+        response_time[name_] = processing_time[name_][0].start - arrive_;
+        avr_response += (double)response_time[name_];
     }
-    for (i = 0; i < num; i++) {
-        response_time[i] = processing_time[i][0].start - Process[i].arrive;
-        avr_response += response_time[i];
-    }
-
     avr_wait /= (double)num;
     avr_turnaround /= (double)num;
     avr_response /= (double)num;
-
+    
     print_(avr_wait, avr_turnaround, avr_response);
 }
 // 비선점 Priority이면 우선순위 정렬이 필요함 => sort_priority
@@ -199,27 +197,51 @@ void RR(process* Process) {
 // 그 프로세스가 끝나고 난 시간에 우선순위 높은거 실행하고, 그런식으로 진행해야함.
 // 그럼 일단 진행 시간 확인해야지
 void Priority(process* Process) {
-    sort_priority(Process);
+    //도착시간 순으로 정렬
+    sort_arrive(Process);
 
-    int i, complete = 0, turnaround = 0, wait = 0;
-    process ing = {};
-    processing pt = {};
-
+    int i = 0, j = 0;
+    processing pt;
+    pt.end = 0;
     double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
-    queue<process> Plist = {};
 
+    //프로세스 타임 초기화
     for (i = 0; i < num; i++)
         processing_time[i].clear();
 
-    for (i = 0; i < num; i++)
-        Plist.push(Process[i]);
+    for (i = 0; i < num; i++) {
+        j = i;
+        while (Process[j].arrive <= pt.end) {
+            if(j>=num) break;
+            j++;
+        }
+        sort_priority(Process, i, j);
 
-    while (1) {
+        int name_ = Process[i].name;
+        int burst_ = Process[i].burst;
+        int arrive_ = Process[i].arrive;
 
+        pt.start = pt.end;
+        pt.end = burst_ + pt.end;
+        pt.burst = burst_;
+        processing_time[name_].push_back(pt);
+
+        wait_time[name_] = pt.start - arrive_;
+        avr_wait += (double)wait_time[name_];
+
+        turnaround_time[name_] = pt.end - arrive_;
+        avr_turnaround += (double)turnaround_time[name_];
+
+        response_time[name_] = pt.start - arrive_;
+        avr_response += (double)response_time[name_];
     }
 
-}
+    avr_wait /= (double)num;
+    avr_turnaround /= (double)num;
+    avr_response /= (double)num;
+    print_(avr_wait, avr_turnaround, avr_response);
 
+}
 void print_(double avr_wait, double avr_turnaround, double avr_response) {
     int i, j;
 
@@ -262,7 +284,7 @@ void sort_arrive(process* Process) {
     int i, j;
 
     for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
+        for (j = 0; j < num - 1 - i; j++) {
             if (Process[j].arrive > Process[j + 1].arrive) {
                 process temp = Process[j + 1];
                 Process[j + 1] = Process[j];
@@ -272,16 +294,20 @@ void sort_arrive(process* Process) {
     }
 }
 
-void sort_priority(process* Process) {
-    int i, j;
-
-    for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
-            if (Process[j].priority > Process[j + 1].priority) {
-                process temp = Process[j + 1];
-                Process[j + 1] = Process[j];
-                Process[j] = temp;
+void sort_priority(process* Process, int i, int temp) {
+    int j, x;
+    process tmp, min;
+    int index = 0;
+    for (x = i; x < temp - 1; x++) {
+        min.priority = 100;
+        for (j = x; j < temp; j++) {
+            if (min.priority > Process[j].priority) {
+                min = Process[j];
+                index = j;
             }
         }
+        tmp = Process[x];
+        Process[x] = Process[index];
+        Process[index] = tmp;
     }
 }
