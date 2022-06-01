@@ -24,10 +24,12 @@ typedef struct processing {
 // ����ð� ����
 struct cmpburst {
 	bool operator()(process a, process b) {
+        if(a.burst == b.burst){
+            return a.arrive > b.arrive;
+        }
 		return a.burst > b.burst;
 	}
 };
-
 
 
 int num = 0;
@@ -78,6 +80,7 @@ int main() {
         Process[i].burst = burst;
         burst_time[i] = burst;
     }
+    
     FCFS(Process);
     SJF(Process);
     SRTF(Process);
@@ -98,7 +101,7 @@ void sort_arrive(process* Process) {
     int i, j;
 
     for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
+        for (j = 0; j < num - 1-i; j++) {
             if (Process[j].arrive > Process[j + 1].arrive) {
                 process temp = Process[j + 1];
                 Process[j + 1] = Process[j];
@@ -109,8 +112,6 @@ void sort_arrive(process* Process) {
 }
 
 void FCFS( process *Process ){
-    
-    
    sort_arrive(Process);
 
    
@@ -183,7 +184,6 @@ bool done_find(int done[], int done_len, int num){
 void SJF( process *Process ){
     
     // ready queue 
-    printf("start");
     priority_queue<process, vector<process>,cmpburst> readyQ;
 
     for (int i = 0; i < num; i++)
@@ -257,7 +257,6 @@ void SJF( process *Process ){
         //���� �ð��� �÷��ش�
         time += burst_t;
 
-        printf("���� ���μ��� %d\n", name);
 
         // ������ �Ϸ� �߰�, ���� ���� �͵� �߿��� ���ο� �� ������
         // ������� �ʾҰ� arrive�� �ð����� ���� ���� priority ready queue�� ���� 
@@ -275,7 +274,6 @@ void SJF( process *Process ){
             
             //������� �ʾҴ��� Ȯ��
             if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false) && (isin == false)) {
-                printf("����ť ���μ���: %d\n",Process[i].name);
                 //readyqueue�� �����ϰ� done���� ���� �߰�
                 readyQ.push(Process[i]);
                                 
@@ -357,11 +355,6 @@ void SRTF(process *Process){
 
 
     while(time<=fin_time){
-
-        // cout << "���� ���μ���: " << present.name << endl;
-        // printf("���� ���μ���: %d\n",present.name);
-        // printf("���� ���μ��� ����Ʈ: %d\n",present.burst);
-        // printf("���� �ð�%d\n",time);
 
         while (1){
             if (Slist.size() != 0 && Slist.front().arrive == time){
