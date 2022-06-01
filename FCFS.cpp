@@ -23,6 +23,9 @@ typedef struct processing {
 // 실행시간 정렬
 struct cmpburst {
 	bool operator()(process a, process b) {
+        if(a.burst == b.burst){
+            return a.arrive > b.arrive;
+        }
 		return a.burst > b.burst;
 	}
 };
@@ -91,6 +94,10 @@ void sort_arrive(process* Process) {
     }
 }
 
+
+
+
+
 void FCFS( process *Process ){
     
     
@@ -115,32 +122,32 @@ void FCFS( process *Process ){
 
         // 간트 차트용 값 작성
         tmp.burst = burst_t;
-        tmp.start = arrive_t;
-        tmp.end = burst_t + arrive_t;
-        processing_time[i].push_back(tmp); 
+        tmp.start = time;
+        tmp.end = burst_t + time;
+        int name = Process[i].name;
+        processing_time[name].push_back(tmp); 
        
         while(time < arrive_t){
             time += 1;
         }
 
         
-
         // 대기 시간
-        wait_time[i] = time - arrive_t;
+        wait_time[name] = time - arrive_t;
         avg_wait += time - arrive_t;
 
         // 반환 시간
-        turnaround_time[i] = time + burst_t - arrive_t;
+        turnaround_time[name] = time + burst_t - arrive_t;
         avg_turnaround += time + burst_t -arrive_t;
         
         // 실행 시간
-        burst_time[i] = burst_t;
+        burst_time[name] = burst_t;
         
         // 완료 시간
-        complete_time[i] = time + burst_t;
+        complete_time[name] = time + burst_t;
 
         // 반응 시간
-        response_time[i] = time -arrive_t;
+        response_time[name] = time -arrive_t;
         avg_response += time -arrive_t;
 
         time += burst_t; 
@@ -150,8 +157,6 @@ void FCFS( process *Process ){
     avg_wait /= (double)num;
     avg_turnaround /= (double)num;
     avg_response /= (double)num;
-
-    printf("%d\n",fin_time);
     print_(avg_wait, avg_turnaround, avg_response);
 
 }
@@ -170,11 +175,13 @@ bool done_find(int done[], int done_len, int num){
 void SJF( process *Process ){
     
     // ready queue 
+    printf("start");
     priority_queue<process, vector<process>,cmpburst> readyQ;
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
+    // 도착 순서대로 정렬 후, 우선 순위 적용
     sort_arrive(Process);
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
@@ -185,6 +192,8 @@ void SJF( process *Process ){
             }
         }
     }
+
+
 
     int time = 0;
     double avg_wait = 0;
@@ -195,17 +204,22 @@ void SJF( process *Process ){
     int done_num = 0;
 
     int process_num = 0;
+    process present = Process[process_num];
+    int name = present.name;
     
 
-    while(time<fin_time){
+    while(time < fin_time){
 
-        done[done_num] = Process[process_num].name;
+        // 현재 프로세스를 정함
+
+        name = present.name;
+        done[done_num] = name;
         done_num += 1;
 
         
         // 현재 프로세스
-        int burst_t = Process[process_num].burst;
-        int arrive_t = Process[process_num].arrive;
+        int burst_t = present.burst;
+        int arrive_t = present.arrive;
         
         //실행할 것이 없는 상황
         if(arrive_t > time){
@@ -217,29 +231,43 @@ void SJF( process *Process ){
         
         tmp.start = time;
         tmp.end = burst_t + time;
-        tmp.burst = tmp.start - tmp.end;
-        processing_time[process_num].push_back(tmp);
+        tmp.burst = burst_t;
+        processing_time[name].push_back(tmp);
         
+
     
         // 프로세스 값에 따라 시간 계산
-        wait_time[process_num] =  time - arrive_t;
+        wait_time[name] =  time - arrive_t;
         avg_wait +=  (time - arrive_t) ;
 
-        turnaround_time[process_num] = burst_t + time -arrive_t;
+        turnaround_time[name] = burst_t + time -arrive_t;
         avg_turnaround += burst_t + time- arrive_t;
 
-        response_time[process_num] = time - arrive_t;
+        response_time[name] = time - arrive_t;
         avg_response += time - arrive_t;
         
         //현재 시간을 올려준다
         time += burst_t;
 
+        printf("현재 프로세스 %d\n", name);
+
+        // 시행을 완료 했고, 하지 않은 것들 중에서 새로운 것 고르기
         // 시행되지 않았고 arrive가 시간보다 적은 것을 priority ready queue에 삽입 
         for(int i = 0; i< num; i++){
+            priority_queue<process, vector<process>,cmpburst> readyQ2;
+            readyQ2 = readyQ;
+            bool isin = false;
+            for(int j = 0; j <readyQ.size(); j++){
+                process tmp = readyQ2.top();
+                readyQ2.pop();
+                if(tmp.name == Process[i].name){
+                    isin = true;
+                }
+            }
             
             //시행되지 않았는지 확인
-            if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false)) {
-                
+            if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false) && (isin == false)) {
+                printf("레디큐 프로세스: %d\n",Process[i].name);
                 //readyqueue에 삽입하고 done에서 값을 추가
                 readyQ.push(Process[i]);
                                 
@@ -247,14 +275,18 @@ void SJF( process *Process ){
         }
         // priority ready_queue에 들어간 것 중에서 우선순위 높은 값 뽑기
         int next_process = readyQ.top().name;
+        
+
         readyQ.pop();
 
         // 다음 실행을 위해서 프로세스숫자를 다음 우선순위가 높은 프로세세 값으로 바꿈
-        for(int i=0; i< num; i++){
-            if(Process[i].name==next_process){
+        for(int i=0; i < num; i++){
+            if(Process[i].name == next_process){
                 process_num = i;
             }
         }
+
+        present = Process[process_num];
         
     }
 
@@ -266,20 +298,24 @@ void SJF( process *Process ){
 
 }
 
-void SRTF( process *Process ){
 
+void SRTF(process *Process){
 
-    //초기 값을 두는 것은 똑같음 
-    //done을 없애고 프로세스의 버스트 값을 깍아서 0이 된 경우 실행하지 않는 방식
-    // bust값을 두는 배열을 만들 필요가 있음
-    
-    // ready queue 
     priority_queue<process, vector<process>,cmpburst> readyQ;
+
+    int burst[num];
+    for (int i =0; i< num; i++){
+        burst[i] = Process[i].burst;
+    }
+
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
+    // 도착 순서에 따라서 배열
     sort_arrive(Process);
+
+    // 도착 순서가 같다면, 실행 시간이 짧은 것을 우선
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
             if (Process[j].arrive==Process[j+1].arrive && Process[j].burst>Process[j+1].burst) {
@@ -290,168 +326,112 @@ void SRTF( process *Process ){
         }
     }
 
+    int total = 0, complete = 0, turnaround = 0, wait = 0;
     int time = 0;
     double avg_wait = 0;
     double avg_turnaround = 0;
     double avg_response = 0;
-
-    // 프로세스들의 버스트 값을 저장
-    int burst[num];
-    for (int i =0; i< num; i++){
-        burst[i] = Process[i].burst;
-    }
-
-
     int process_num = 0;
-    int burst_t = Process[process_num].burst;
-    int arrive_t = Process[process_num].arrive;
-    
+    int done[num];
+    int done_num = 0;
 
-    while(time<fin_time){
-        
-        int start_t = time;
+    queue<process> Slist; 
+
+	for (int j = 0; j < num; j++) {
+		Slist.push(Process[j]);
+		total += Process[j].burst;
+	}
+    process present, tmp;
+    // 초기 프로세스 설정
+	present = Slist.front();
+	Slist.pop();
+	processing pt;
+	pt.start = 0;
 
 
-        while(1){
-            
-            //한 번 루프마다 프로세스의 버스트 값 감소
-            Process[process_num].burst -=1;
-            // 시간 증가
-            time +=1;
+    while(time<=fin_time){
 
-            // arrive가 시간보다 적은 것을 priority ready queue에 삽입 
-            for(int i = 0; i< num; i++){
-                if(Process[i].arrive <= time  &&  Process[i].burst > 0 ){
-                    //readyqueue에 삽입하고 
-                    readyQ.push(Process[i]);
-                }
+        // cout << "현재 프로세스: " << present.name << endl;
+        // printf("현재 프로세스: %d\n",present.name);
+        // printf("현재 프로세스 버스트: %d\n",present.burst);
+        // printf("현재 시간%d\n",time);
+
+        while (1){
+            if (Slist.size() != 0 && Slist.front().arrive == time){
+                tmp = Slist.front();
+			    Slist.pop();
+                if (tmp.burst < present.burst) {
+
+					// 현재 프로세스 교체되면 processing time 계산
+					pt.end = time;
+					pt.burst = time - pt.start;
+					if (pt.burst != 0)
+						processing_time[present.name].push_back(pt);
+					pt.start = time; // 새로운 시작값 저장
+
+					// 새로운 프로세스 꺼내옴
+					readyQ.push(present);
+					present = tmp;
+				}
+                else readyQ.push(tmp);
             }
-            
-            // ready que에 더 작은 값이 들어오면 기록하고 교채
-            if(readyQ.top().burst < burst_t){
-                
-                //간트 차트 용 값 추가
-                processing tmp;
-                tmp.start = start_t;
-                tmp.end = time;
-                tmp.burst = tmp.start - tmp.end;
-                processing_time[process_num].push_back(tmp);
-
-                // 프로세스 값에 따라 시간 계산
-                wait_time[process_num] +=  time - start_t;
-                avg_wait +=  (time - start_t) ;
-
-                turnaround_time[process_num] += tmp.start - tmp.end + time -start_t;
-                avg_turnaround += tmp.start - tmp.end + time- start_t;
-
-                //response는 처음 한 번만 적용
-                if(response_time[process_num]<= time - arrive_t){
-                    response_time[process_num] = time - arrive_t;
-                    avg_response += time - arrive_t;
-                }
-
-                // 현재 프로세스를 푸시
-                readyQ.push(Process[process_num]);
-
-                //readyque에서 새로운 프로세스를 꺼내옴
-                process next_process = readyQ.top();
-                readyQ.pop();
-                process_num = next_process.name;
-                break;
-            }
-            //프로세스의 시행 시간이 0이되어 종료되는 경우
-            else if(Process[process_num].burst ==0){
-                
-                //간트 차트 용 값 추가
-                processing tmp;
-                tmp.start = start_t;
-                tmp.end = time;
-                tmp.burst = tmp.start - tmp.end;
-                processing_time[process_num].push_back(tmp);
-
-                // 프로세스 값에 따라 시간 계산
-                wait_time[process_num] +=  time - start_t;
-                avg_wait +=  (time - start_t) ;
-
-                turnaround_time[process_num] += tmp.start - tmp.end + time -start_t;
-                avg_turnaround += tmp.start - tmp.end + time- start_t;
-
-                //response는 처음 한 번만 적용
-                if(response_time[process_num]<= time - arrive_t){
-                    response_time[process_num] = time - arrive_t;
-                    avg_response += time - arrive_t;
-                }
-
-                //readyque에서 새로운 프로세스를 꺼내옴
-                process next_process = readyQ.top();
-                readyQ.pop();
-                process_num = next_process.name;
-                break;
-
-
-            }
-            
+            else break;
 
         }
-    
-       
-    
-        // arrive가 시간보다 적은 것을 priority ready queue에 삽입 
-        for(int i = 0; i< num; i++){
-            
-            if(Process[i].arrive <= time){
+        if (present.burst == 0) {
+            int name = present.name;
+			int burst = present.burst;
+			int arrive = present.arrive;
+            complete = time;
 
-                //readyqueue에 삽입하고 
-                readyQ.push(Process[i]);
-                                
+            if(done_find(done,done_num,name) == false){
+                done[done_num] = name;
+                done_num +=1;
+                avg_response += complete - burst_time[name] - arrive;
+                response_time[name] = complete - burst_time[name] - arrive;
             }
+
+            
+			wait = complete - burst_time[name] - arrive;
+			turnaround = complete - arrive;
+			turnaround_time[name] = turnaround;
+			wait_time[name] = wait;
+
+            avg_wait += (double)wait;
+			avg_turnaround += (double)turnaround;
+
+            pt.end = time;
+			pt.burst = time - pt.start;
+            if (pt.burst != 0)
+				processing_time[name].push_back(pt);
+			pt.start = time; // 새로운 시작값 저장
+            if (readyQ.size() != 0) {
+				present = readyQ.top();
+				readyQ.pop();
+		    }
+            else if (time != fin_time && readyQ.size() == 0) {
+				cout << "SJF 스케줄링 중간에 공백이 생겼습니다. - 잘못된 입력입니다.";
+				system("pause");
+				exit(1);
+		    }
+		    else break;
         }
-        // priority ready_queue에 들어간 것 중에서 우선순위 높은 값 뽑기
-        process next_process = readyQ.top();
-        readyQ.pop();
+        present.burst -= 1; // 현재 처리중인 프로세스의 burst 1 감소
+	    time = time + 1; // 시간은 1 지남
+    }
+    avg_turnaround /= (double)num;
+	avg_wait /= (double)num;
+    avg_response /= (double)num;
 
-        //실행할 것이 없는 상황
-        if(arrive_t > time){
-            time = arrive_t;
-        }
-
-        //간트 차트 용 값 추가
-        processing tmp;
-        
-        tmp.start = time;
-        tmp.end = burst_t + time;
-        tmp.burst = tmp.start - tmp.end;
-        processing_time[process_num].push_back(tmp);
-        
-    
-        // 프로세스 값에 따라 시간 계산
-        wait_time[process_num] =  time - arrive_t;
-        avg_wait +=  (time - arrive_t) ;
-
-        turnaround_time[process_num] = burst_t + time -arrive_t;
-        avg_turnaround += burst_t + time- arrive_t;
-
-        response_time[process_num] = time - arrive_t;
-        avg_response += time - arrive_t;
-        
-        //현재 시간을 올려준다
-        time += 1;
-
-        // 시간을 하나씩 올리면서 ready que 값을 확인하면서 교체나 프로세스의 종료가 발생하는지 확인
-
-
-
-
-      
+    for( int i = 0; i <num; i++){
+        Process[i].burst = burst[i];
     }
 
-    avg_wait /= (double)num;
-    avg_turnaround /= (double)num;
-    avg_response /= (double)num;
-    
     print_(avg_wait, avg_turnaround, avg_response);
-
+    
 }
+
+
 
 int main(){
    
@@ -490,8 +470,6 @@ int main(){
     delete[]turnaround_time;
     delete[]burst_time;
     delete[]response_time;
-
-
     
     return 0;
 }
