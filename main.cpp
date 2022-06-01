@@ -41,6 +41,59 @@ int* turnaround_time; //turnaround time
 int* response_time; // response time
 vector<processing>* processing_time; //�� ���μ��� ���� ��Ʈ��Ʈ�� ��
 
+void RR(process* Process);
+void Priority(process* Process);
+void print_(double avr_wait, double avr_turnaround, double avr_response);
+void sort_priority(process* Process, int i, int temp);
+void sort_arrive(process* Process);
+void FCFS(process* Process);
+bool done_find(int done[], int done_len, int num);
+void SJF( process *Process);
+void SRTF( process *Process);
+
+int main() {
+    int name;
+    int arrive, burst, priority;
+
+    cout << "개수를 입력하시오: ";
+    cin >> num;
+    cout << "TQ를 입력하시오: ";
+    cin >> TQ;
+
+    process* Process = new process[num];
+
+    processing_time = new vector<processing>[num]();
+    burst_time = new int[num]();
+    complete_time = new int[num]();
+    wait_time = new int[num]();
+    turnaround_time = new int[num]();
+    response_time = new int[num]();
+
+    for (int i = 0; i < num; i++) {
+        cout << "프로세스별 ariive burst priority 입력하세요: ";
+        cin >> arrive >> burst >> priority;
+        Process[i].name = i;
+        Process[i].arrive = arrive;
+        Process[i].priority = priority;
+        Process[i].burst = burst;
+        burst_time[i] = burst;
+    }
+    FCFS(Process);
+    SJF(Process);
+    SRTF(Process);
+    RR(Process);
+    Priority(Process);
+
+    delete[]wait_time;
+    delete[]processing_time;
+    delete[]complete_time;
+    delete[]turnaround_time;
+    delete[]burst_time;
+    delete[]response_time;
+
+    return 0;
+}
+
 void sort_arrive(process* Process) {
     int i, j;
 
@@ -79,32 +132,32 @@ void FCFS( process *Process ){
 
         // ��Ʈ ��Ʈ�� �� �ۼ�
         tmp.burst = burst_t;
-        tmp.start = arrive_t;
-        tmp.end = burst_t + arrive_t;
-        processing_time[i].push_back(tmp); 
+        tmp.start = time;
+        tmp.end = burst_t + time;
+        int name = Process[i].name;
+        processing_time[name].push_back(tmp); 
        
         while(time < arrive_t){
             time += 1;
         }
 
         
-
         // ��� �ð�
-        wait_time[i] = time - arrive_t;
+        wait_time[name] = time - arrive_t;
         avg_wait += time - arrive_t;
 
         // ��ȯ �ð�
-        turnaround_time[i] = time + burst_t - arrive_t;
+        turnaround_time[name] = time + burst_t - arrive_t;
         avg_turnaround += time + burst_t -arrive_t;
         
         // ���� �ð�
-        burst_time[i] = burst_t;
+        burst_time[name] = burst_t;
         
         // �Ϸ� �ð�
-        complete_time[i] = time + burst_t;
+        complete_time[name] = time + burst_t;
 
         // ���� �ð�
-        response_time[i] = time -arrive_t;
+        response_time[name] = time -arrive_t;
         avg_response += time -arrive_t;
 
         time += burst_t; 
@@ -114,8 +167,6 @@ void FCFS( process *Process ){
     avg_wait /= (double)num;
     avg_turnaround /= (double)num;
     avg_response /= (double)num;
-
-    printf("%d\n",fin_time);
     print_(avg_wait, avg_turnaround, avg_response);
 
 }
@@ -129,14 +180,16 @@ bool done_find(int done[], int done_len, int num){
     return false;
 }
 
-void SJF( process *Process){
+void SJF( process *Process ){
     
     // ready queue 
+    printf("start");
     priority_queue<process, vector<process>,cmpburst> readyQ;
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
+    // ���� ������� ���� ��, �켱 ���� ����
     sort_arrive(Process);
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
@@ -147,6 +200,8 @@ void SJF( process *Process){
             }
         }
     }
+
+
 
     int time = 0;
     double avg_wait = 0;
@@ -157,17 +212,22 @@ void SJF( process *Process){
     int done_num = 0;
 
     int process_num = 0;
+    process present = Process[process_num];
+    int name = present.name;
     
 
-    while(time<fin_time){
+    while(time < fin_time){
 
-        done[done_num] = Process[process_num].name;
+        // ���� ���μ����� ����
+
+        name = present.name;
+        done[done_num] = name;
         done_num += 1;
 
         
         // ���� ���μ���
-        int burst_t = Process[process_num].burst;
-        int arrive_t = Process[process_num].arrive;
+        int burst_t = present.burst;
+        int arrive_t = present.arrive;
         
         //������ ���� ���� ��Ȳ
         if(arrive_t > time){
@@ -179,29 +239,43 @@ void SJF( process *Process){
         
         tmp.start = time;
         tmp.end = burst_t + time;
-        tmp.burst = tmp.start - tmp.end;
-        processing_time[process_num].push_back(tmp);
+        tmp.burst = burst_t;
+        processing_time[name].push_back(tmp);
         
+
     
         // ���μ��� ���� ���� �ð� ���
-        wait_time[process_num] =  time - arrive_t;
+        wait_time[name] =  time - arrive_t;
         avg_wait +=  (time - arrive_t) ;
 
-        turnaround_time[process_num] = burst_t + time -arrive_t;
+        turnaround_time[name] = burst_t + time -arrive_t;
         avg_turnaround += burst_t + time- arrive_t;
 
-        response_time[process_num] = time - arrive_t;
+        response_time[name] = time - arrive_t;
         avg_response += time - arrive_t;
         
         //���� �ð��� �÷��ش�
         time += burst_t;
 
+        printf("���� ���μ��� %d\n", name);
+
+        // ������ �Ϸ� �߰�, ���� ���� �͵� �߿��� ���ο� �� ������
         // ������� �ʾҰ� arrive�� �ð����� ���� ���� priority ready queue�� ���� 
         for(int i = 0; i< num; i++){
+            priority_queue<process, vector<process>,cmpburst> readyQ2;
+            readyQ2 = readyQ;
+            bool isin = false;
+            for(int j = 0; j <readyQ.size(); j++){
+                process tmp = readyQ2.top();
+                readyQ2.pop();
+                if(tmp.name == Process[i].name){
+                    isin = true;
+                }
+            }
             
             //������� �ʾҴ��� Ȯ��
-            if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false)) {
-                
+            if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false) && (isin == false)) {
+                printf("����ť ���μ���: %d\n",Process[i].name);
                 //readyqueue�� �����ϰ� done���� ���� �߰�
                 readyQ.push(Process[i]);
                                 
@@ -209,14 +283,18 @@ void SJF( process *Process){
         }
         // priority ready_queue�� �� �� �߿��� �켱���� ���� �� �̱�
         int next_process = readyQ.top().name;
+        
+
         readyQ.pop();
 
         // ���� ������ ���ؼ� ���μ������ڸ� ���� �켱������ ���� ���μ��� ������ �ٲ�
-        for(int i=0; i< num; i++){
-            if(Process[i].name==next_process){
+        for(int i=0; i < num; i++){
+            if(Process[i].name == next_process){
                 process_num = i;
             }
         }
+
+        present = Process[process_num];
         
     }
 
@@ -227,21 +305,24 @@ void SJF( process *Process){
     print_(avg_wait, avg_turnaround, avg_response);
 
 }
-/*
-void SRTF( process *Process ){
 
+void SRTF(process *Process){
 
-    //�ʱ� ���� �δ� ���� �Ȱ��� 
-    //done�� ���ְ� ���μ����� ����Ʈ ���� ��Ƽ� 0�� �� ��� �������� �ʴ� ���
-    // bust���� �δ� �迭�� ���� �ʿ䰡 ����
-    
-    // ready queue 
     priority_queue<process, vector<process>,cmpburst> readyQ;
+
+    int burst[num];
+    for (int i =0; i< num; i++){
+        burst[i] = Process[i].burst;
+    }
+
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
+    // ���� ������ ���� �迭
     sort_arrive(Process);
+
+    // ���� ������ ���ٸ�, ���� �ð��� ª�� ���� �켱
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
             if (Process[j].arrive==Process[j+1].arrive && Process[j].burst>Process[j+1].burst) {
@@ -252,222 +333,122 @@ void SRTF( process *Process ){
         }
     }
 
+    int total = 0, complete = 0, turnaround = 0, wait = 0;
     int time = 0;
     double avg_wait = 0;
     double avg_turnaround = 0;
     double avg_response = 0;
-
-    // ���μ������� ����Ʈ ���� ����
-    int burst[num];
-    for (int i =0; i< num; i++){
-        burst[i] = Process[i].burst;
-    }
-
-
     int process_num = 0;
-    int burst_t = Process[process_num].burst;
-    int arrive_t = Process[process_num].arrive;
-    
+    int done[num];
+    int done_num = 0;
 
-    while(time<fin_time){
-        
-        int start_t = time;
+    queue<process> Slist; 
+
+	for (int j = 0; j < num; j++) {
+		Slist.push(Process[j]);
+		total += Process[j].burst;
+	}
+    process present, tmp;
+    // �ʱ� ���μ��� ����
+	present = Slist.front();
+	Slist.pop();
+	processing pt;
+	pt.start = 0;
 
 
-        while(1){
-            
-            //�� �� �������� ���μ����� ����Ʈ �� ����
-            Process[process_num].burst -=1;
-            // �ð� ����
-            time +=1;
+    while(time<=fin_time){
 
-            // arrive�� �ð����� ���� ���� priority ready queue�� ���� 
-            for(int i = 0; i< num; i++){
-                if(Process[i].arrive <= time  &&  Process[i].burst > 0 ){
-                    //readyqueue�� �����ϰ� 
-                    readyQ.push(Process[i]);
-                }
+        // cout << "���� ���μ���: " << present.name << endl;
+        // printf("���� ���μ���: %d\n",present.name);
+        // printf("���� ���μ��� ����Ʈ: %d\n",present.burst);
+        // printf("���� �ð�%d\n",time);
+
+        while (1){
+            if (Slist.size() != 0 && Slist.front().arrive == time){
+                tmp = Slist.front();
+			    Slist.pop();
+                if (tmp.burst < present.burst) {
+
+					// ���� ���μ��� ��ü�Ǹ� processing time ���
+					pt.end = time;
+					pt.burst = time - pt.start;
+					if (pt.burst != 0)
+						processing_time[present.name].push_back(pt);
+					pt.start = time; // ���ο� ���۰� ����
+
+					// ���ο� ���μ��� ������
+					readyQ.push(present);
+					present = tmp;
+				}
+                else readyQ.push(tmp);
             }
-            
-            // ready que�� �� ���� ���� ������ ����ϰ� ��ä
-            if(readyQ.top().burst < burst_t){
-                
-                //��Ʈ ��Ʈ �� �� �߰�
-                processing tmp;
-                tmp.start = start_t;
-                tmp.end = time;
-                tmp.burst = tmp.start - tmp.end;
-                processing_time[process_num].push_back(tmp);
-
-                // ���μ��� ���� ���� �ð� ���
-                wait_time[process_num] +=  time - start_t;
-                avg_wait +=  (time - start_t) ;
-
-                turnaround_time[process_num] += tmp.start - tmp.end + time -start_t;
-                avg_turnaround += tmp.start - tmp.end + time- start_t;
-
-                //response�� ó�� �� ���� ����
-                if(response_time[process_num]<= time - arrive_t){
-                    response_time[process_num] = time - arrive_t;
-                    avg_response += time - arrive_t;
-                }
-
-                // ���� ���μ����� Ǫ��
-                readyQ.push(Process[process_num]);
-
-                //readyque���� ���ο� ���μ����� ������
-                process next_process = readyQ.top();
-                readyQ.pop();
-                process_num = next_process.name;
-                break;
-            }
-            //���μ����� ���� �ð��� 0�̵Ǿ� ����Ǵ� ���
-            else if(Process[process_num].burst ==0){
-                
-                //��Ʈ ��Ʈ �� �� �߰�
-                processing tmp;
-                tmp.start = start_t;
-                tmp.end = time;
-                tmp.burst = tmp.start - tmp.end;
-                processing_time[process_num].push_back(tmp);
-
-                // ���μ��� ���� ���� �ð� ���
-                wait_time[process_num] +=  time - start_t;
-                avg_wait +=  (time - start_t) ;
-
-                turnaround_time[process_num] += tmp.start - tmp.end + time -start_t;
-                avg_turnaround += tmp.start - tmp.end + time- start_t;
-
-                //response�� ó�� �� ���� ����
-                if(response_time[process_num]<= time - arrive_t){
-                    response_time[process_num] = time - arrive_t;
-                    avg_response += time - arrive_t;
-                }
-
-                //readyque���� ���ο� ���μ����� ������
-                process next_process = readyQ.top();
-                readyQ.pop();
-                process_num = next_process.name;
-                break;
-
-
-            }
-            
+            else break;
 
         }
-    
-       
-    
-        // arrive�� �ð����� ���� ���� priority ready queue�� ���� 
-        for(int i = 0; i< num; i++){
-            
-            if(Process[i].arrive <= time){
+        if (present.burst == 0) {
+            int name = present.name;
+			int burst = present.burst;
+			int arrive = present.arrive;
+            complete = time;
 
-                //readyqueue�� �����ϰ� 
-                readyQ.push(Process[i]);
-                                
+            if(done_find(done,done_num,name) == false){
+                done[done_num] = name;
+                done_num +=1;
+                avg_response += complete - burst_time[name] - arrive;
+                response_time[name] = complete - burst_time[name] - arrive;
             }
+
+            
+			wait = complete - burst_time[name] - arrive;
+			turnaround = complete - arrive;
+			turnaround_time[name] = turnaround;
+			wait_time[name] = wait;
+
+            avg_wait += (double)wait;
+			avg_turnaround += (double)turnaround;
+
+            pt.end = time;
+			pt.burst = time - pt.start;
+            if (pt.burst != 0)
+				processing_time[name].push_back(pt);
+			pt.start = time; // ���ο� ���۰� ����
+            if (readyQ.size() != 0) {
+				present = readyQ.top();
+				readyQ.pop();
+		    }
+            else if (time != fin_time && readyQ.size() == 0) {
+				cout << "SJF �����ٸ� �߰��� ������ ������ϴ�. - �߸��� �Է��Դϴ�.";
+				system("pause");
+				exit(1);
+		    }
+		    else break;
         }
-        // priority ready_queue�� �� �� �߿��� �켱���� ���� �� �̱�
-        process next_process = readyQ.top();
-        readyQ.pop();
-
-        //������ ���� ���� ��Ȳ
-        if(arrive_t > time){
-            time = arrive_t;
-        }
-
-        //��Ʈ ��Ʈ �� �� �߰�
-        processing tmp;
-        
-        tmp.start = time;
-        tmp.end = burst_t + time;
-        tmp.burst = tmp.start - tmp.end;
-        processing_time[process_num].push_back(tmp);
-        
-    
-        // ���μ��� ���� ���� �ð� ���
-        wait_time[process_num] =  time - arrive_t;
-        avg_wait +=  (time - arrive_t) ;
-
-        turnaround_time[process_num] = burst_t + time -arrive_t;
-        avg_turnaround += burst_t + time- arrive_t;
-
-        response_time[process_num] = time - arrive_t;
-        avg_response += time - arrive_t;
-        
-        //���� �ð��� �÷��ش�
-        time += 1;
-
-        // �ð��� �ϳ��� �ø��鼭 ready que ���� Ȯ���ϸ鼭 ��ü�� ���μ����� ���ᰡ �߻��ϴ��� Ȯ��
-
-
-
-
-      
+        present.burst -= 1; // ���� ó������ ���μ����� burst 1 ����
+	    time = time + 1; // �ð��� 1 ����
     }
-
-    avg_wait /= (double)num;
     avg_turnaround /= (double)num;
+	avg_wait /= (double)num;
     avg_response /= (double)num;
-}
 
-*/
-int main() {
-    int name;
-    int arrive, burst, priority;
-
-    cout << "개수를 입력하시오: ";
-    cin >> num;
-    cout << "TQ를 입력하시오: ";
-    cin >> TQ;
-
-    process* Process = new process[num];
-
-    processing_time = new vector<processing>[num]();
-    burst_time = new int[num]();
-    complete_time = new int[num]();
-    wait_time = new int[num]();
-    turnaround_time = new int[num]();
-    response_time = new int[num]();
-
-    for (int i = 0; i < num; i++) {
-        cout << "프로세스별 ariive burst priority 입력하세요: ";
-        cin >> arrive >> burst >> priority;
-        Process[i].name = i;
-        Process[i].arrive = arrive;
-        Process[i].priority = priority;
-        Process[i].burst = burst;
-        burst_time[i] = burst;
+    for( int i = 0; i <num; i++){
+        Process[i].burst = burst[i];
     }
-    FCFS(Process);
-    SJF(Process);
-    //SRTF(Process);
-    RR(Process);
-    //Priority(Process);
 
-    delete[]wait_time;
-    delete[]processing_time;
-    delete[]complete_time;
-    delete[]turnaround_time;
-    delete[]burst_time;
-    delete[]response_time;
-
-    return 0;
+    print_(avg_wait, avg_turnaround, avg_response);
+    
 }
 
 
 void RR(process* Process) {
-
     sort_arrive(Process);
 
     int i, sum = 0, complete = 0, turnaround = 0, wait = 0;
-    process ing = {};
-    processing pt = {};
+    process ing;
+    processing pt;
 
     double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
-    queue<process> Plist = {};
-    queue<process> readyQ = {};
+    queue<process> Plist;
+    queue<process> readyQ;
 
     for (i = 0; i < num; i++)
         processing_time[i].clear();
@@ -481,7 +462,7 @@ void RR(process* Process) {
     while (i < sum) {
 
         while (1) {
-            if (Plist.size() != 0 && Plist.front().arrive == i) {
+            if (Plist.size() != 0 && Plist.front().arrive <= i) {
                 readyQ.push(Plist.front());
                 Plist.pop();
             }
@@ -499,7 +480,7 @@ void RR(process* Process) {
         //큰경우
         if (burst_ > TQ) {
             while (1) {
-                if (Plist.size() != 0 && Plist.front().arrive < i + TQ) {
+                if (Plist.size() != 0 && Plist.front().arrive <= i + TQ) {
                     readyQ.push(Plist.front());
                     Plist.pop();
                 }
@@ -515,12 +496,11 @@ void RR(process* Process) {
             ing.burst -= TQ;
             readyQ.push(ing);
             i = i + TQ;
-
         }
         //작은경우
         else {
             while (1) {
-                if (Plist.size() != 0 && Plist.front().arrive < i + burst_) {
+                if (Plist.size() != 0 && Plist.front().arrive <= i + burst_) {
                     readyQ.push(Plist.front());
                     Plist.pop();
                 }
@@ -546,16 +526,13 @@ void RR(process* Process) {
 
             i = i + burst_;
         }
+        response_time[name_] = processing_time[name_][0].start - arrive_;
+        avr_response += (double)response_time[name_];
     }
-    for (i = 0; i < num; i++) {
-        response_time[i] = processing_time[i][0].start - Process[i].arrive;
-        avr_response += response_time[i];
-    }
-
     avr_wait /= (double)num;
     avr_turnaround /= (double)num;
     avr_response /= (double)num;
-
+    
     print_(avr_wait, avr_turnaround, avr_response);
 }
 // 비선점 Priority이면 우선순위 정렬이 필요함 => sort_priority
@@ -564,25 +541,68 @@ void RR(process* Process) {
 // 그 프로세스가 끝나고 난 시간에 우선순위 높은거 실행하고, 그런식으로 진행해야함.
 // 그럼 일단 진행 시간 확인해야지
 void Priority(process* Process) {
-    sort_priority(Process);
+    //도착시간 순으로 정렬
+    sort_arrive(Process);
 
-    int i, complete = 0, turnaround = 0, wait = 0;
-    process ing = {};
-    processing pt = {};
-
+    int i = 0, j = 0;
+    processing pt;
+    pt.end = 0;
     double avr_wait = 0.0, avr_turnaround = 0.0, avr_response = 0.0;
-    queue<process> Plist = {};
 
+    //프로세스 타임 초기화
     for (i = 0; i < num; i++)
         processing_time[i].clear();
 
-    for (i = 0; i < num; i++)
-        Plist.push(Process[i]);
+    for (i = 0; i < num; i++) {
+        j = i;
+        while (Process[j].arrive <= pt.end) {
+            if(j>=num) break;
+            j++;
+        }
+        sort_priority(Process, i, j);
 
-    while (1) {
+        int name_ = Process[i].name;
+        int burst_ = Process[i].burst;
+        int arrive_ = Process[i].arrive;
 
+        pt.start = pt.end;
+        pt.end = burst_ + pt.end;
+        pt.burst = burst_;
+        processing_time[name_].push_back(pt);
+
+        wait_time[name_] = pt.start - arrive_;
+        avr_wait += (double)wait_time[name_];
+
+        turnaround_time[name_] = pt.end - arrive_;
+        avr_turnaround += (double)turnaround_time[name_];
+
+        response_time[name_] = pt.start - arrive_;
+        avr_response += (double)response_time[name_];
     }
 
+    avr_wait /= (double)num;
+    avr_turnaround /= (double)num;
+    avr_response /= (double)num;
+    print_(avr_wait, avr_turnaround, avr_response);
+
+}
+
+void sort_priority(process* Process, int i, int temp) {
+    int j, x;
+    process tmp, min;
+    int index = 0;
+    for (x = i; x < temp - 1; x++) {
+        min.priority = 100;
+        for (j = x; j < temp; j++) {
+            if (min.priority > Process[j].priority) {
+                min = Process[j];
+                index = j;
+            }
+        }
+        tmp = Process[x];
+        Process[x] = Process[index];
+        Process[index] = tmp;
+    }
 }
 
 void print_(double avr_wait, double avr_turnaround, double avr_response) {
@@ -620,33 +640,4 @@ void print_(double avr_wait, double avr_turnaround, double avr_response) {
     cout << "평균 반환시간 : " << avr_turnaround << endl;
     //평균응답시간
     cout << "평균 응답시간 : " << avr_response << endl;
-}
-
-
-void sort_arrive(process* Process) {
-    int i, j;
-
-    for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
-            if (Process[j].arrive > Process[j + 1].arrive) {
-                process temp = Process[j + 1];
-                Process[j + 1] = Process[j];
-                Process[j] = temp;
-            }
-        }
-    }
-}
-
-void sort_priority(process* Process) {
-    int i, j;
-
-    for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
-            if (Process[j].priority > Process[j + 1].priority) {
-                process temp = Process[j + 1];
-                Process[j + 1] = Process[j];
-                Process[j] = temp;
-            }
-        }
-    }
 }
