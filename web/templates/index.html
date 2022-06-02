@@ -33,16 +33,27 @@
             시간할당량
             <input placeholder="1" name="quota" />
           </div>
+          <div class="cntContainer inputContainer">
+            개수
+            <input
+              placeholder="1"
+              name="cnt"
+              id="cnt"
+              type="number"
+              readonly
+              value="1"
+            />
+          </div>
           <div class="inputContainer newInputContainer">
             프로세스 ID
-            <input placeholder="pid" name="pid" />
+            <input placeholder="pid" name="pid0" />
             도착시간
-            <input placeholder="0" name="arrive_time" />
+            <input placeholder="0" name="arrive_time0" />
             서비스시간
-            <input placeholder="10" name="service_time" />
+            <input placeholder="10" name="service_time0" />
             우선순위
-            <input placeholder="1" name="priority" />
-            <button class="plusButton" onClick="new_line()">+</button>
+            <input placeholder="1" name="priority0" />
+            <div class="plusButton" onClick="new_line()">+</div>
           </div>
           <input class="submit" type="submit" value="계산하기" />
         </form>
@@ -63,7 +74,7 @@
                 {% for p in s.processes %}
                 <div
                   class="ganttItem"
-                  style="margin-left: {{p.startTime/scheduler[0].mx*100}}%; width: {{(p.endTime-p.startTime)/scheduler[0].mx*100}}%"
+                  style="margin-left: {{p.startTime/s.mx*100}}%; width: {{(p.endTime-p.startTime)/s.mx*100}}%"
                 >
                   <div
                     class="ganttItemBackground"
@@ -89,51 +100,70 @@
           <section class="section">
             <div class="title">대기 시간</div>
             <div class="waitingList">
-              {% for p in s.processes %}
+              {% for p in s.ps %}
               <div>{{p.pid}}</div>
               <div>{{p.waitingTime}}</div>
               {% endfor %}
             </div>
+            <div class="title">반환 시간</div>
+            <div class="waitingList">
+              {% for p in s.ps %}
+              <div>{{p.pid}}</div>
+              <div>{{p.turnaroundTime}}</div>
+              {% endfor %}
+            </div>
+            <div class="title">응답 시간</div>
+            <div class="waitingList">
+              {% for p in s.ps %}
+              <div>{{p.pid}}</div>
+              <div>{{p.responseTime}}</div>
+              {% endfor %}
+            </div>
             <div class="averageWaitingTime">
               <strong>평균 대기시간: </strong>{{s.averageWaitingTime}}
+            </div>
+            <div class="averageWaitingTime">
+              <strong>평균 반환시간: </strong>{{s.averageTurnaroundTime}}
+            </div>
+            <div class="averageWaitingTime">
+              <strong>평균 응답시간: </strong>{{s.averageResponseTime}}
             </div>
           </section>
         </div>
         {% endfor %}
       </div>
     </div>
-    <script>
+    <script type="text/javascript">
+      let i = 0;
       function new_line() {
+        i++;
+        document.getElementById("cnt").value = `${i + 1}`;
+
         const inputContainer = document.createElement("div");
         inputContainer.className = "inputContainer";
         inputContainer.append("프로세스 ID");
         const pidInput = document.createElement("input");
         pidInput.placeholder = "pid";
+        pidInput.name = `pid${i}`;
         inputContainer.appendChild(pidInput);
         inputContainer.append("도착시간");
         const arriveTimeInput = document.createElement("input");
         arriveTimeInput.placeholder = "0";
+        arriveTimeInput.name = `arrive_time${i}`;
         inputContainer.appendChild(arriveTimeInput);
         inputContainer.append("서비스시간");
         const serviceTimeInput = document.createElement("input");
         serviceTimeInput.placeholder = "10";
+        serviceTimeInput.name = `service_time${i}`;
         inputContainer.appendChild(serviceTimeInput);
         inputContainer.append("우선순위");
         const priorityInput = document.createElement("input");
         priorityInput.placeholder = "1";
+        priorityInput.name = `priority${i}`;
         inputContainer.appendChild(priorityInput);
         document
-          .querySelectorAll(".newInputContainer input")
-          .forEach((e) => (e.value = ""));
-        document
           .querySelector(".inputList")
-          .insertBefore(
-            inputContainer,
-            document.querySelector(".inputList .newInputContainer")
-          );
-        document
-          .querySelectorAll(".newInputContainer input")
-          .forEach((e) => (e.value = ""));
+          .insertBefore(inputContainer, document.querySelector(".submit"));
       }
     </script>
   </body>
