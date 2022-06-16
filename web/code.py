@@ -226,6 +226,8 @@ def calc():
         for j in range(num):
             Slist.append(Process[j])
             total += Process[j].burst
+            response_time[j] =- 1
+
 
         present = Slist[0]
         Slist.pop(0)
@@ -258,9 +260,6 @@ def calc():
                 if (done_find(done, done_num, _name) == False):
                     done[done_num] = _name
                     done_num += 1
-                    avg_response += complete - burst_time[_name] - _arrive
-                    response_time[_name] = complete - \
-                        burst_time[_name] - _arrive
 
                 wait = complete - burst_time[_name] - _arrive
                 turnaround = complete - _arrive
@@ -282,6 +281,10 @@ def calc():
                     print("asdf")
                 else:
                     break
+            if(response_time[present.name] == -1):
+                response_time[present.name] = time - present.arrive
+                avg_response += response_time[present.name]
+            
             present.burst -= 1
             time = time + 1
         avg_turnaround /= num
@@ -369,7 +372,9 @@ def calc():
                 i = i + burst_
 
             response_time[name_] = processing_time[name_][0].start - arrive_
-            avr_response += response_time[name_]
+        
+        for i in range(num):
+            avr_response += response_time[i]
 
         avr_wait /= num
         avr_turnaround /= num

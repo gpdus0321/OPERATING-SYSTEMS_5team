@@ -21,7 +21,6 @@ typedef struct processing
     int burst;
 } processing;
 
-// ����ð� ����
 struct cmpburst
 {
     bool operator()(process a, process b)
@@ -43,7 +42,7 @@ int *complete_time;                  // completetime
 int *wait_time;                      // waiting time
 int *turnaround_time;                // turnaround time
 int *response_time;                  // response time
-vector<processing> *processing_time; //�� ���μ��� ���� ��Ʈ��Ʈ�� ��
+vector<processing> *processing_time; // processingtime 배열
 
 void RR(process *Process);
 void Priority(process *Process);
@@ -139,7 +138,6 @@ void FCFS(process *Process)
         int burst_t = Process[i].burst;
         int arrive_t = Process[i].arrive;
 
-        // ��Ʈ ��Ʈ�� �� �ۼ�
         tmp.burst = burst_t;
         tmp.start = time;
         tmp.end = burst_t + time;
@@ -151,21 +149,16 @@ void FCFS(process *Process)
             time += 1;
         }
 
-        // ��� �ð�
         wait_time[name] = time - arrive_t;
         avg_wait += time - arrive_t;
 
-        // ��ȯ �ð�
         turnaround_time[name] = time + burst_t - arrive_t;
         avg_turnaround += time + burst_t - arrive_t;
 
-        // ���� �ð�
         burst_time[name] = burst_t;
 
-        // �Ϸ� �ð�
         complete_time[name] = time + burst_t;
 
-        // ���� �ð�
         response_time[name] = time - arrive_t;
         avg_response += time - arrive_t;
 
@@ -176,6 +169,7 @@ void FCFS(process *Process)
     avg_wait /= (double)num;
     avg_turnaround /= (double)num;
     avg_response /= (double)num;
+    cout<<"---------------FCFS---------------"<<endl;
     print_(avg_wait, avg_turnaround, avg_response);
 }
 
@@ -193,14 +187,12 @@ bool done_find(int done[], int done_len, int num)
 
 void SJF(process *Process)
 {
-
     // ready queue
     priority_queue<process, vector<process>, cmpburst> readyQ;
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
-    // ���� ������� ���� ��, �켱 ���� ����
     sort_arrive(Process);
     for (int i = 0; i < num - 1; i++)
     {
@@ -229,24 +221,18 @@ void SJF(process *Process)
 
     while (time < fin_time)
     {
-
-        // ���� ���μ����� ����
-
         name = present.name;
         done[done_num] = name;
         done_num += 1;
 
-        // ���� ���μ���
         int burst_t = present.burst;
         int arrive_t = present.arrive;
 
-        //������ ���� ���� ��Ȳ
         if (arrive_t > time)
         {
             time = arrive_t;
         }
 
-        //��Ʈ ��Ʈ �� �� �߰�
         processing tmp;
 
         tmp.start = time;
@@ -254,7 +240,6 @@ void SJF(process *Process)
         tmp.burst = burst_t;
         processing_time[name].push_back(tmp);
 
-        // ���μ��� ���� ���� �ð� ���
         wait_time[name] = time - arrive_t;
         avg_wait += (time - arrive_t);
 
@@ -264,11 +249,8 @@ void SJF(process *Process)
         response_time[name] = time - arrive_t;
         avg_response += time - arrive_t;
 
-        //���� �ð��� �÷��ش�
         time += burst_t;
 
-        // ������ �Ϸ� �߰�, ���� ���� �͵� �߿��� ���ο� �� ������
-        // ������� �ʾҰ� arrive�� �ð����� ���� ���� priority ready queue�� ����
         for (int i = 0; i < num; i++)
         {
             priority_queue<process, vector<process>, cmpburst> readyQ2;
@@ -310,7 +292,7 @@ void SJF(process *Process)
     avg_wait /= (double)num;
     avg_turnaround /= (double)num;
     avg_response /= (double)num;
-
+    cout<<"---------------SJF---------------"<<endl;
     print_(avg_wait, avg_turnaround, avg_response);
 }
 
@@ -450,7 +432,7 @@ void SRTF(process *Process)
     {
         Process[i].burst = burst[i];
     }
-
+    cout<<"---------------SRTF---------------"<<endl;
     print_(avg_wait, avg_turnaround, avg_response);
 }
 
@@ -553,12 +535,14 @@ void RR(process *Process)
             i = i + burst_;
         }
         response_time[name_] = processing_time[name_][0].start - arrive_;
-        avr_response += (double)response_time[name_];
     }
+    for(i = 0; i<num; i++)
+        avr_response += (double)response_time[i];
+
     avr_wait /= (double)num;
     avr_turnaround /= (double)num;
     avr_response /= (double)num;
-
+    cout<<"---------------RR---------------"<<endl;
     print_(avr_wait, avr_turnaround, avr_response);
 }
 // 비선점 Priority이면 우선순위 정렬이 필요함 => sort_priority
@@ -613,6 +597,8 @@ void Priority(process *Process)
     avr_wait /= (double)num;
     avr_turnaround /= (double)num;
     avr_response /= (double)num;
+    cout<<"---------------Priority---------------"<<endl;
+
     print_(avr_wait, avr_turnaround, avr_response);
 }
 

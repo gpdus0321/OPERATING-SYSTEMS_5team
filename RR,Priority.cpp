@@ -183,8 +183,10 @@ void RR(process* Process) {
             i = i + burst_;
         }
         response_time[name_] = processing_time[name_][0].start - arrive_;
-        avr_response += (double)response_time[name_];
     }
+    for(i = 0; i<num; i++)
+        avr_response += (double)response_time[i];
+        
     avr_wait /= (double)num;
     avr_turnaround /= (double)num;
     avr_response /= (double)num;
