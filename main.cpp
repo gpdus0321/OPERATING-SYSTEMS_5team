@@ -360,6 +360,7 @@ void SRTF(process *Process)
     {
         Slist.push(Process[j]);
         total += Process[j].burst;
+        response_time[j] =-1;
     }
     process present, tmp;
    
