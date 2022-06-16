@@ -20,7 +20,7 @@ typedef struct processing {
 	int burst;
 }processing;
 
-// ½ÇÇà½Ã°£ Á¤·Ä
+
 struct cmpburst {
 	bool operator()(process a, process b) {
         if(a.burst == b.burst){
@@ -41,50 +41,50 @@ int* wait_time; // waiting time
 int* turnaround_time; //turnaround time
 int* response_time; // response time
 
-vector<processing>* processing_time; //°¢ ÇÁ·Î¼¼½º º°·Î °£Æ®Â÷Æ®¿ë °ª
+vector<processing>* processing_time; //ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½
 
 void print_(double avr_wait, double avr_turnaround, double avr_response) {
     int i, j;
 
-    cout << endl << "°£Æ® Â÷Æ®" << endl;
-    //°£Æ®Â÷Æ®´Â start ¿À¸§Â÷¼ø Á¤·ÄÇØ¼­ Á× »ÌÀ¸¸é µÉµí.
+    cout << endl << "ê°„íŠ¸ ì°¨íŠ¸" << endl;
+    //ï¿½ï¿½Æ®ï¿½ï¿½Æ®ï¿½ï¿½ start ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Éµï¿½.
 
     for (int i = 0; i < num; i++) {
         cout << "P" << i + 1 << " : ";
         for (int j = 0; j < processing_time[i].size(); j++)
-            cout << "(" << processing_time[i][j].start << " ~ " << processing_time[i][j].end << " " << processing_time[i][j].burst << "½ÇÇà) ";
+            cout << "(" << processing_time[i][j].start << " ~ " << processing_time[i][j].end << " " << processing_time[i][j].burst << "ï¿½ï¿½ï¿½ï¿½) ";
         cout << endl;
     }
 
-    //ÇÁ·Î¼¼½ºº° ´ë±â½Ã°£
-    cout << "ÇÁ·Î¼¼½ºº° ´ë±â½Ã°£ : ";
+
+    cout << "í”„ë¡œì„¸ìŠ¤ë³„ ëŒ€ê¸°ì‹œê°„ ";
     for (i = 0; i < num; i++)
         cout << "P" << i << " - " << wait_time[i] << "  ";
     cout << endl;
-    //ÇÁ·Î¼¼½ºº° ¹ÝÈ¯½Ã°£
-    cout << "ÇÁ·Î¼¼½ºº° ¹ÝÈ¯½Ã°£ : ";
+    //ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ã°ï¿½
+    cout <<"í”„ë¡œì„¸ìŠ¤ë³„ ë°˜í™˜ì‹œê°„ : ";
     for (i = 0; i < num; i++)
         cout << "P" << i << " - " << turnaround_time[i] << "  ";
     cout << endl;
-    //ÇÁ·Î¼¼½ºº° ÀÀ´ä½Ã°£
-    cout << "ÇÁ·Î¼¼½ºº° ÀÀ´ä½Ã°£ : ";
+    //ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã°ï¿½
+    cout << "í”„ë¡œì„¸ìŠ¤ë³„ ì‘ë‹µì‹œê°„ : ";
     for (i = 0; i < num; i++)
         cout << "P" << i << " - " << response_time[i] << "  ";
 
     cout << endl;
-    //Æò±Õ´ë±â½Ã°£
-    cout << "Æò±Õ ´ë±â½Ã°£ : " << avr_wait << endl;
-    //Æò±Õ¹ÝÈ¯½Ã°£
-    cout << "Æò±Õ ¹ÝÈ¯½Ã°£ : " << avr_turnaround << endl;
-    //Æò±ÕÀÀ´ä½Ã°£
-    cout << "Æò±Õ ÀÀ´ä½Ã°£ : " << avr_response << endl;
+    //ï¿½ï¿½Õ´ï¿½ï¿½Ã°ï¿½
+    cout << "ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã°ï¿½ : " << avr_wait << endl;
+    //ï¿½ï¿½Õ¹ï¿½È¯ï¿½Ã°ï¿½
+    cout << "ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ã°ï¿½ : " << avr_turnaround << endl;
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã°ï¿½
+    cout << "ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã°ï¿½ : " << avr_response << endl;
 }
 
 void sort_arrive(process* Process) {
     int i, j;
 
     for (i = 0; i < num - 1; i++) {
-        for (j = 0; j < num - i; j++) {
+        for (j = 0; j < num - i- 1; j++) {
             if (Process[j].arrive > Process[j + 1].arrive) {
                 process temp = Process[j + 1];
                 Process[j + 1] = Process[j];
@@ -120,7 +120,7 @@ void FCFS( process *Process ){
         int burst_t = Process[i].burst;
         int arrive_t = Process[i].arrive;
 
-        // °£Æ® Â÷Æ®¿ë °ª ÀÛ¼º
+        // ï¿½ï¿½Æ® ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ ï¿½Û¼ï¿½
         tmp.burst = burst_t;
         tmp.start = time;
         tmp.end = burst_t + time;
@@ -132,21 +132,21 @@ void FCFS( process *Process ){
         }
 
         
-        // ´ë±â ½Ã°£
+        // ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
         wait_time[name] = time - arrive_t;
         avg_wait += time - arrive_t;
 
-        // ¹ÝÈ¯ ½Ã°£
+        // ï¿½ï¿½È¯ ï¿½Ã°ï¿½
         turnaround_time[name] = time + burst_t - arrive_t;
         avg_turnaround += time + burst_t -arrive_t;
         
-        // ½ÇÇà ½Ã°£
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
         burst_time[name] = burst_t;
         
-        // ¿Ï·á ½Ã°£
+        // ï¿½Ï·ï¿½ ï¿½Ã°ï¿½
         complete_time[name] = time + burst_t;
 
-        // ¹ÝÀÀ ½Ã°£
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
         response_time[name] = time -arrive_t;
         avg_response += time -arrive_t;
 
@@ -175,13 +175,13 @@ bool done_find(int done[], int done_len, int num){
 void SJF( process *Process ){
     
     // ready queue 
-    printf("start");
+    // printf("start");
     priority_queue<process, vector<process>,cmpburst> readyQ;
 
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
-    // µµÂø ¼ø¼­´ë·Î Á¤·Ä ÈÄ, ¿ì¼± ¼øÀ§ Àû¿ë
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ì¼± ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     sort_arrive(Process);
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
@@ -210,23 +210,23 @@ void SJF( process *Process ){
 
     while(time < fin_time){
 
-        // ÇöÀç ÇÁ·Î¼¼½º¸¦ Á¤ÇÔ
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         name = present.name;
         done[done_num] = name;
         done_num += 1;
 
         
-        // ÇöÀç ÇÁ·Î¼¼½º
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½
         int burst_t = present.burst;
         int arrive_t = present.arrive;
         
-        //½ÇÇàÇÒ °ÍÀÌ ¾ø´Â »óÈ²
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È²
         if(arrive_t > time){
             time = arrive_t;
         }
 
-        //°£Æ® Â÷Æ® ¿ë °ª Ãß°¡
+        //ï¿½ï¿½Æ® ï¿½ï¿½Æ® ï¿½ï¿½ ï¿½ï¿½ ï¿½ß°ï¿½
         processing tmp;
         
         tmp.start = time;
@@ -236,7 +236,7 @@ void SJF( process *Process ){
         
 
     
-        // ÇÁ·Î¼¼½º °ª¿¡ µû¶ó ½Ã°£ °è»ê
+        // ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½
         wait_time[name] =  time - arrive_t;
         avg_wait +=  (time - arrive_t) ;
 
@@ -246,13 +246,13 @@ void SJF( process *Process ){
         response_time[name] = time - arrive_t;
         avg_response += time - arrive_t;
         
-        //ÇöÀç ½Ã°£À» ¿Ã·ÁÁØ´Ù
+        //ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ø´ï¿½
         time += burst_t;
 
-        printf("ÇöÀç ÇÁ·Î¼¼½º %d\n", name);
+        // printf("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ %d\n", name);
 
-        // ½ÃÇàÀ» ¿Ï·á Çß°í, ÇÏÁö ¾ÊÀº °Íµé Áß¿¡¼­ »õ·Î¿î °Í °í¸£±â
-        // ½ÃÇàµÇÁö ¾Ê¾Ò°í arrive°¡ ½Ã°£º¸´Ù ÀûÀº °ÍÀ» priority ready queue¿¡ »ðÀÔ 
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½ ï¿½ß°ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Íµï¿½ ï¿½ß¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò°ï¿½ arriveï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ priority ready queueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
         for(int i = 0; i< num; i++){
             priority_queue<process, vector<process>,cmpburst> readyQ2;
             readyQ2 = readyQ;
@@ -265,21 +265,21 @@ void SJF( process *Process ){
                 }
             }
             
-            //½ÃÇàµÇÁö ¾Ê¾Ò´ÂÁö È®ÀÎ
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾Ò´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
             if((Process[i].arrive <= time) && (done_find(done,done_num,Process[i].name) == false) && (isin == false)) {
-                printf("·¹µðÅ¥ ÇÁ·Î¼¼½º: %d\n",Process[i].name);
-                //readyqueue¿¡ »ðÀÔÇÏ°í done¿¡¼­ °ªÀ» Ãß°¡
+                // printf("ï¿½ï¿½ï¿½ï¿½Å¥ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½: %d\n",Process[i].name);
+                //readyqueueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ doneï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
                 readyQ.push(Process[i]);
                                 
             }
         }
-        // priority ready_queue¿¡ µé¾î°£ °Í Áß¿¡¼­ ¿ì¼±¼øÀ§ ³ôÀº °ª »Ì±â
+        // priority ready_queueï¿½ï¿½ ï¿½ï¿½î°£ ï¿½ï¿½ ï¿½ß¿ï¿½ï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ì±ï¿½
         int next_process = readyQ.top().name;
         
 
         readyQ.pop();
 
-        // ´ÙÀ½ ½ÇÇàÀ» À§ÇØ¼­ ÇÁ·Î¼¼½º¼ýÀÚ¸¦ ´ÙÀ½ ¿ì¼±¼øÀ§°¡ ³ôÀº ÇÁ·Î¼¼¼¼ °ªÀ¸·Î ¹Ù²Þ
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½
         for(int i=0; i < num; i++){
             if(Process[i].name == next_process){
                 process_num = i;
@@ -312,10 +312,10 @@ void SRTF(process *Process){
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
-    // µµÂø ¼ø¼­¿¡ µû¶ó¼­ ¹è¿­
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½è¿­
     sort_arrive(Process);
 
-    // µµÂø ¼ø¼­°¡ °°´Ù¸é, ½ÇÇà ½Ã°£ÀÌ ÂªÀº °ÍÀ» ¿ì¼±
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ Âªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ì¼±
     for (int i = 0; i < num - 1; i++) {
         for (int j = 0; j < num - i; j++) {
             if (Process[j].arrive==Process[j+1].arrive && Process[j].burst>Process[j+1].burst) {
@@ -342,7 +342,7 @@ void SRTF(process *Process){
 		total += Process[j].burst;
 	}
     process present, tmp;
-    // ÃÊ±â ÇÁ·Î¼¼½º ¼³Á¤
+    // ï¿½Ê±ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	present = Slist.front();
 	Slist.pop();
 	processing pt;
@@ -351,10 +351,7 @@ void SRTF(process *Process){
 
     while(time<=fin_time){
 
-        // cout << "ÇöÀç ÇÁ·Î¼¼½º: " << present.name << endl;
-        // printf("ÇöÀç ÇÁ·Î¼¼½º: %d\n",present.name);
-        // printf("ÇöÀç ÇÁ·Î¼¼½º ¹ö½ºÆ®: %d\n",present.burst);
-        // printf("ÇöÀç ½Ã°£%d\n",time);
+        
 
         while (1){
             if (Slist.size() != 0 && Slist.front().arrive == time){
@@ -362,14 +359,14 @@ void SRTF(process *Process){
 			    Slist.pop();
                 if (tmp.burst < present.burst) {
 
-					// ÇöÀç ÇÁ·Î¼¼½º ±³Ã¼µÇ¸é processing time °è»ê
+					// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½Ç¸ï¿½ processing time ï¿½ï¿½ï¿½
 					pt.end = time;
 					pt.burst = time - pt.start;
 					if (pt.burst != 0)
 						processing_time[present.name].push_back(pt);
-					pt.start = time; // »õ·Î¿î ½ÃÀÛ°ª ÀúÀå
+					pt.start = time; // ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½Û°ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-					// »õ·Î¿î ÇÁ·Î¼¼½º ²¨³»¿È
+					// ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					readyQ.push(present);
 					present = tmp;
 				}
@@ -387,8 +384,6 @@ void SRTF(process *Process){
             if(done_find(done,done_num,name) == false){
                 done[done_num] = name;
                 done_num +=1;
-                avg_response += complete - burst_time[name] - arrive;
-                response_time[name] = complete - burst_time[name] - arrive;
             }
 
             
@@ -404,20 +399,24 @@ void SRTF(process *Process){
 			pt.burst = time - pt.start;
             if (pt.burst != 0)
 				processing_time[name].push_back(pt);
-			pt.start = time; // »õ·Î¿î ½ÃÀÛ°ª ÀúÀå
+			pt.start = time; // ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½Û°ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (readyQ.size() != 0) {
 				present = readyQ.top();
 				readyQ.pop();
 		    }
             else if (time != fin_time && readyQ.size() == 0) {
-				cout << "SJF ½ºÄÉÁÙ¸µ Áß°£¿¡ °ø¹éÀÌ »ý°å½À´Ï´Ù. - Àß¸øµÈ ÀÔ·ÂÀÔ´Ï´Ù.";
+				cout << "SJF ï¿½ï¿½ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½. - ï¿½ß¸ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½Ô´Ï´ï¿½.";
 				system("pause");
 				exit(1);
 		    }
 		    else break;
         }
-        present.burst -= 1; // ÇöÀç Ã³¸®ÁßÀÎ ÇÁ·Î¼¼½ºÀÇ burst 1 °¨¼Ò
-	    time = time + 1; // ½Ã°£Àº 1 Áö³²
+        if(response_time[present.name] == -1){
+            response_time[present.name] = time - present.arrive;
+            avg_response +=(double)response_time[present.name];
+        }
+        present.burst -= 1; // ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ burst 1 ï¿½ï¿½ï¿½ï¿½
+	    time = time + 1; // ï¿½Ã°ï¿½ï¿½ï¿½ 1 ï¿½ï¿½ï¿½ï¿½
     }
     avg_turnaround /= (double)num;
 	avg_wait /= (double)num;
@@ -437,9 +436,9 @@ int main(){
    
     int name, arrive, burst, priority;
 
-    cout << "°³¼ö¸¦ ÀÔ·ÂÇÏ½Ã¿À: ";
+    cout << "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½Ï½Ã¿ï¿½: ";
     cin >> num;
-    cout << "TQ¸¦ ÀÔ·ÂÇÏ½Ã¿À: ";
+    cout << "TQï¿½ï¿½ ï¿½Ô·ï¿½ï¿½Ï½Ã¿ï¿½: ";
     cin >> TQ;
 
     process *Process = new process[num];
@@ -452,7 +451,7 @@ int main(){
 
 
     for(int i = 0;i<num;i++){
-        std::cout<<"ÇÁ·Î¼¼½ºº° ariive burst priority ÀÔ·ÂÇÏ¼¼¿ä:";
+        std::cout<<"ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ ariive burst priority ï¿½Ô·ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½:";
         std::cin>>arrive>>burst>>priority;
         Process[i].name = i;
         Process[i].arrive = arrive;
