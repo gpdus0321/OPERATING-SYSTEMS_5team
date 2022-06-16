@@ -284,19 +284,18 @@ void SJF(process *Process)
                 }
             }
 
-            //������� �ʾҴ��� Ȯ��
+      
             if ((Process[i].arrive <= time) && (done_find(done, done_num, Process[i].name) == false) && (isin == false))
             {
-                // readyqueue�� �����ϰ� done���� ���� �߰�
+             
                 readyQ.push(Process[i]);
             }
         }
-        // priority ready_queue�� �� �� �߿��� �켱���� ���� �� �̱�
+
         int next_process = readyQ.top().name;
 
         readyQ.pop();
 
-        // ���� ������ ���ؼ� ���μ������ڸ� ���� �켱������ ���� ���μ��� ������ �ٲ�
         for (int i = 0; i < num; i++)
         {
             if (Process[i].name == next_process)
@@ -329,10 +328,10 @@ void SRTF(process *Process)
     for (int i = 0; i < num; i++)
         processing_time[i].clear();
 
-    // ���� ������ ���� �迭
+   
     sort_arrive(Process);
 
-    // ���� ������ ���ٸ�, ���� �ð��� ª�� ���� �켱
+
     for (int i = 0; i < num - 1; i++)
     {
         for (int j = 0; j < num - i; j++)
@@ -346,7 +345,7 @@ void SRTF(process *Process)
         }
     }
 
-    int total = 0, complete = 0, turnaround = 0, wait = 0;
+    int total = 0, complete = 0, turnaround = 0, wait = 0, response = 0;
     int time = 0;
     double avg_wait = 0;
     double avg_turnaround = 0;
@@ -363,7 +362,7 @@ void SRTF(process *Process)
         total += Process[j].burst;
     }
     process present, tmp;
-    // �ʱ� ���μ��� ����
+   
     present = Slist.front();
     Slist.pop();
     processing pt;
@@ -380,15 +379,11 @@ void SRTF(process *Process)
                 Slist.pop();
                 if (tmp.burst < present.burst)
                 {
-
-                    // ���� ���μ��� ��ü�Ǹ� processing time ���
                     pt.end = time;
                     pt.burst = time - pt.start;
                     if (pt.burst != 0)
                         processing_time[present.name].push_back(pt);
-                    pt.start = time; // ���ο� ���۰� ����
-
-                    // ���ο� ���μ��� ������
+                    pt.start = time;
                     readyQ.push(present);
                     present = tmp;
                 }
@@ -409,8 +404,7 @@ void SRTF(process *Process)
             {
                 done[done_num] = name;
                 done_num += 1;
-                avg_response += complete - burst_time[name] - arrive;
-                response_time[name] = complete - burst_time[name] - arrive;
+            
             }
 
             wait = complete - burst_time[name] - arrive;
@@ -425,7 +419,7 @@ void SRTF(process *Process)
             pt.burst = time - pt.start;
             if (pt.burst != 0)
                 processing_time[name].push_back(pt);
-            pt.start = time; // ���ο� ���۰� ����
+            pt.start = time; 
             if (readyQ.size() != 0)
             {
                 present = readyQ.top();
@@ -433,15 +427,19 @@ void SRTF(process *Process)
             }
             else if (time != fin_time && readyQ.size() == 0)
             {
-                cout << "SJF �����ٸ� �߰��� ������ ������ϴ�. - �߸��� �Է��Դϴ�.";
                 system("pause");
                 exit(1);
             }
             else
                 break;
         }
-        present.burst -= 1; // ���� ó������ ���μ����� burst 1 ����
-        time = time + 1;    // �ð��� 1 ����
+
+        if(response_time[present.name] == -1){
+            response_time[present.name] = time - present.arrive;
+            avg_response +=(double)response_time[present.name];
+        }
+        present.burst -= 1; 
+        time = time + 1;    
     }
     avg_turnaround /= (double)num;
     avg_wait /= (double)num;
@@ -521,7 +519,7 @@ void RR(process *Process)
             readyQ.push(ing);
             i = i + TQ;
         }
-        //작은경우
+  
         else
         {
             while (1)
