@@ -385,6 +385,18 @@ def calc(num, TQ, __p):
 
         print_("RR", avr_wait, avr_turnaround, avr_response)
 
+    def sort_priority(i, temp):
+        index = 0
+        for x in range(i, temp-1):
+            min = process(0, 0, 0, 100)
+            for j in range(x, temp):
+                if (min.priority > Process[j].priority):
+                    min = Process[j]
+                    index = j
+            tmp = Process[x]
+            Process[x] = Process[index]
+            Process[index] = tmp
+
     def Priority():
         sort_arrive()
 
@@ -423,18 +435,6 @@ def calc(num, TQ, __p):
         avr_turnaround /= num
         avr_response /= num
         print_("비선점 Priority", avr_wait, avr_turnaround, avr_response)
-
-    def sort_priority(i, temp):
-        index = 0
-        for x in range(i, temp-1):
-            min = process(0, 0, 0, 100)
-            for j in range(x, temp):
-                if (min.priority > Process[j].priority):
-                    min = Process[j]
-                    index = j
-            tmp = Process[x]
-            Process[x] = Process[index]
-            Process[index] = tmp
 
     def print_(title, avr_wait, avr_turnaround, avr_response):
         for i in range(num):
